@@ -1,0 +1,355 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Math Practice </title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <style>
+            body {
+                font-family: sans-serif;
+                font-size: 20px;
+                background: gray;
+                margin: 0;
+            }
+            .main {
+                text-align: center;
+            }
+            #settings-button {
+                position: absolute;
+                top: 5px;
+                left: 5px;
+                background: transparent;
+                border: none;
+                color: white;
+                font-size: 20px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+            .number, #answer {
+                line-height: 80px;
+                font-size: 40px;
+                text-align: center;
+                width: 90px;
+                display: inline-block;
+            }
+            #operator, #equals {
+                line-height: 80px;
+                font-size: 40px;
+                text-align: center;
+                width: 90px;
+                display: inline-block;
+            }
+            .incorrect {
+                position: relative;
+                background: red;
+                color: black;
+                text-shadow: none;
+            }
+            #score {
+                position: absolute;
+                bottom: 10px;
+                width: 100%;
+            }
+
+            #text {
+                text-align: center;
+                width: 500px;
+                margin-bottom: 15px;
+            }
+
+            .settings {
+                position: absolute;
+                z-index: 1000;
+                border-right: 1px solid black;
+                padding-right: 15px;
+                height: 100%;
+                background: lightgray;
+                padding-left: 10px;
+                bottom: 0px;
+            }
+
+            label {
+                line-height: 18px;
+            }
+
+            #settings-button:focus {
+                border: none;
+                outline: none;
+            }
+
+            .settings span {
+                display: flex;
+                font-size: 12px;
+                margin-top: 10px;
+            }
+
+            .hide {
+                display: none;
+            }
+
+            .show {
+                display: inline;
+            }
+
+            #timer-view {
+                margin-top: 15px;
+            }
+
+            .end-score {
+                font-size: 50px;
+                position: relative;
+                top: 100px;
+            }
+
+            @media screen and (min-width: 1024px) {
+                #text {
+                    display: none;
+                }
+            }
+
+            @media screen and (max-width: 1024px) {
+                #settings-button {
+                    display: none;
+                }
+            }
+        </style>
+
+        <script type="text/javascript">
+
+            // globals
+            var total = 0;
+            var correct = 0;
+            var incorrect = false;
+            var settings = false;
+            var timer = false;
+            var interval;
+
+            var topNum = 0;
+            var bottom = 0;
+            var maxTop = 10;
+            var maxBottom = 10;
+            var onlyAdd = false;
+            var isAdd = true;
+
+            function doMath(userAnswer) {
+                console.log('userAnswer', userAnswer);
+                if (isAdd) {
+                    console.log(topNum + bottom);
+                    return (topNum + bottom) === userAnswer/1;
+                } else {
+                    return (topNum - bottom) === userAnswer/1;
+                }
+            }
+
+            function getNumbers() {
+                document.getElementById('top').innerHTML = '';
+                document.getElementById('operator').innerHTML = '';
+                document.getElementById('bottom').innerHTML = '';
+
+                if (!onlyAdd) {
+                    isAdd = Math.random() < 0.5;
+                }
+
+                function random(num) {
+                    return Math.floor(Math.random() * Math.floor(num)) + 1;
+                }
+
+                topNum = random(maxTop);
+
+                if (isAdd) {
+                    bottom = random(maxBottom);
+                } else {
+                    bottom = random(topNum);
+                }
+
+                document.getElementById('top').innerHTML = topNum;
+                document.getElementById('operator').innerHTML = isAdd ? '+' : '-';
+                document.getElementById('bottom').innerHTML = bottom;
+            }
+
+            function settingsClick() {
+                clearInterval(interval);
+                document.getElementById('timer-view').innerHTML = '';
+                settings = !settings;
+                if(settings) {
+                    document.getElementById('settings').className = 'settings';
+                } else {
+                    total = 0;
+                    correct = 0;
+                    incorrect = false;
+                    document.getElementById('score').className = '';
+                    document.getElementById('score').innerHTML = '';
+                    document.getElementById('settings').classList.add('hide');
+                }
+            }
+
+            function maxTopFn(e) {
+                maxTop = e.value;
+            }
+
+            function maxBottomFn(e) {
+                maxBottom = e.value;
+            }
+
+            function showScore(e) {
+                console.log(e);
+                if(e.checked) {
+                    document.getElementById('score').className = '';
+                } else {
+                    document.getElementById('score').className = 'hide';
+                }
+            }
+
+            function timerCheckbox(e) {
+                if(e.checked) {
+                    timer = true;
+                    document.getElementById('timer-value').className = '';
+                    document.getElementById('timer-go').className = '';
+                    document.getElementById('ok').className = 'hide';
+                } else {
+                    timer = false;
+                    document.getElementById('timer-value').className = 'hide';
+                    document.getElementById('timer-go').className = 'hide';
+                    document.getElementById('ok').className = '';
+                }
+            }
+
+            function go() {
+                total = 0;
+                correct = 0;
+                incorrect = false;
+                document.getElementById('score').className = '';
+                document.getElementById('score').innerHTML = '';
+                settingsClick();
+                document.getElementById('settings').className = 'hide';
+
+                var minutes = document.getElementById('timer-value').value;
+                var seconds = minutes * 60;
+                var timer = seconds;
+
+                interval = setInterval(function(){
+                    if(timer === 0) {
+                        clearInterval(interval);
+                        interval = null;
+                        document.getElementById('score').className = 'end-score';
+                        settingsClick();
+                        return;
+                    }
+                    document.getElementById('timer-view').innerHTML = `${(timer/60) >= 1 ? Math.floor(timer/60) + ' minutes' : ''} ${timer%60} seconds`;
+                    timer--;
+
+                }, 1000);
+            }
+
+            function useCapitals(e) {
+                if(e.checked) {
+                    capitals = true;
+                } else {
+                    capitals = false;
+                }
+            }
+
+            function onLoad() {
+                document.getElementById('text').focus();
+
+                var loadAnswer = '';
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace'){
+                        loadAnswer = '';
+                        document.getElementById('answer').innerHTML = '';
+                    } else if (e.keyCode != 13 && (e.key >= 0 && e.key <= 9)) {
+                        loadAnswer += e.key;
+                        document.getElementById('answer').innerHTML = loadAnswer;
+                    } else if(e.keyCode === 13){
+                        var isAnswer = doMath(loadAnswer);
+                        if (isAnswer) {
+                            getNumbers();
+                            loadAnswer = '';
+                            document.getElementById('answer').innerHTML = '';
+                            total++;
+                            if (!incorrect) {
+                                correct++;
+                            }
+                            incorrect = false;
+                            document.getElementById('score').innerHTML = `${correct} / ${total} (${Math.round((correct/total) * 100)}%)`;
+                        } else {
+                            document.getElementById('answer').classList.add('incorrect');
+                            setTimeout(function(){
+                                loadAnswer = '';
+                                document.getElementById('answer').innerHTML = '';
+                                document.getElementById('answer').className = '';
+                            }, 500);
+                            incorrect = true;
+                        }
+                    }
+                });
+
+                getNumbers();
+            }
+
+        </script>
+    </head>
+
+    <body onload='onLoad()'>
+        <div class='main'>
+            <button id='settings-button' onClick='settingsClick()'> ⚙ </button>
+            <div id='settings' class='settings hide'>
+                <span>
+                    <input id='show-score' checked type='checkbox' onChange='showScore(this)'/>
+                    <label for='show-score'> Show Score </label>
+                </span>
+                <span>
+                    <select id='maxTopNum' onChange='maxTopFn(this)'>
+                        <option value='10'>10</option>
+                        <option value='20'>20</option>
+                        <option value='50'>50</option>
+                        <option value='100'>100</option>
+                    </select>
+                    <label for='maxTopNum'> Max Top Number </label>
+                </span>
+                <span>
+                    <select id='maxBottomNum' onChange='maxBottomFn(this)'>
+                        <option value='10'>10</option>
+                        <option value='20'>20</option>
+                        <option value='50'>50</option>
+                        <option value='100'>100</option>
+                    </select>
+                    <label for='maxBottomNum'> Max Top Number </label>
+                </span>
+                <span>
+                    <input id='timer' type='checkbox' onChange='timerCheckbox(this)'/>
+                    <label for='timer'> Timer </label>
+                </span>
+
+                <span>
+                    <select id='timer-value' class='hide'>
+                        <option value='.5'> 30 Seconds </option>
+                        <option value='1'> 1 Minute </option>
+                        <option value='3'> 3 Minutes </option>
+                        <option value='5'> 5 Minutes </option>
+                    </select>
+
+                    <button id='timer-go' class='hide' onClick='go()'> Go! </button>
+                </span>
+
+                <button id='ok' onClick='settingsClick()'> Ok! </button>
+            </div>
+
+            <span id='math'>
+                <div id='equation'>
+                    <div id='top' class='number'></div>
+                    <div id='operator'></div>
+                    <div id='bottom' class='number'></div>
+                    <div id='equals'>=</div>
+                    <div id='answer' class='number'></div>
+                    <input type='textbox' id='text' placeholder='tap here first'/>
+                </div>
+
+                <div id='timer-view'></div>
+            </span>
+            <div id='score'></div>
+
+        </div>
+    </body>
+</html>
