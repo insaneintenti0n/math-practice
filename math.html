@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -6,66 +5,116 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <style>
             body {
+                background: gray;
                 font-family: sans-serif;
                 font-size: 20px;
-                background: gray;
                 margin: 0;
             }
             .main {
                 text-align: center;
             }
+
+
+            .top-down-equation #top {
+                display: block;
+            }
+
+            .top-down-equation #full-bottom {
+                margin-left: -94px;
+            }
+
+            .top-down-equation #full-bottom,
+            .top-down-equation #operator,
+            .top-down-equation #bottom {
+                display: inline-block;
+            }
+
+            .top-down-equation #equals {
+                border-top: 1px solid black;
+                display: block;
+                height: 2px;
+                margin: 0 auto;
+                width: 100px;
+            }
+
+            .top-down-equation #equals::after {
+                content: '';
+            }
+
             #settings-button {
-                position: absolute;
-                top: 5px;
-                left: 5px;
                 background: transparent;
                 border: none;
                 color: white;
+                cursor: pointer;
                 font-size: 20px;
                 font-weight: bold;
-                cursor: pointer;
+                left: 5px;
+                position: absolute;
+                top: 5px;
+            }
+
+            #equation {
+                position: relative;
+                top: 150px;
             }
             .number, #answer {
-                line-height: 80px;
+                display: inline-block;
                 font-size: 40px;
+                line-height: 80px;
                 text-align: center;
+            }
+
+            #answer {
                 width: 90px;
+            }
+
+            #full-bottom {
                 display: inline-block;
             }
+
             #operator, #equals {
-                line-height: 80px;
-                font-size: 40px;
-                text-align: center;
-                width: 90px;
                 display: inline-block;
+                font-size: 40px;
+                line-height: 80px;
+                text-align: center;
             }
+
+            #operator {
+                width: 90px;
+            }
+
+            #equals::after {
+                content: '=';
+                margin-left: 20px;
+            }
+
             .incorrect {
-                position: relative;
                 background: red;
                 color: black;
+                position: relative;
                 text-shadow: none;
             }
             #score {
-                position: absolute;
                 bottom: 10px;
+                position: absolute;
                 width: 100%;
             }
 
             #text {
+                margin-bottom: 15px;
                 text-align: center;
                 width: 500px;
-                margin-bottom: 15px;
             }
 
             .settings {
+                background: lightgray;
+                border-right: 1px solid black;
+                bottom: 0px;
+                height: 100%;
+                padding-left: 10px;
+                padding-right: 15px;
                 position: absolute;
                 z-index: 1000;
-                border-right: 1px solid black;
-                padding-right: 15px;
-                height: 100%;
-                background: lightgray;
-                padding-left: 10px;
-                bottom: 0px;
             }
 
             label {
@@ -131,17 +180,15 @@
             var onlyAdd = false;
             var isAdd = true;
 
-            function doMath(userAnswer) {
-                console.log('userAnswer', userAnswer);
+            const doMath = (userAnswer) => {
                 if (isAdd) {
-                    console.log(topNum + bottom);
                     return (topNum + bottom) === userAnswer/1;
                 } else {
                     return (topNum - bottom) === userAnswer/1;
                 }
-            }
+            };
 
-            function getNumbers() {
+            const getNumbers = () => {
                 document.getElementById('top').innerHTML = '';
                 document.getElementById('operator').innerHTML = '';
                 document.getElementById('bottom').innerHTML = '';
@@ -165,13 +212,13 @@
                 document.getElementById('top').innerHTML = topNum;
                 document.getElementById('operator').innerHTML = isAdd ? '+' : '-';
                 document.getElementById('bottom').innerHTML = bottom;
-            }
+            };
 
-            function settingsClick() {
+            const settingsClick = () => {
                 clearInterval(interval);
                 document.getElementById('timer-view').innerHTML = '';
                 settings = !settings;
-                if(settings) {
+                if (settings) {
                     document.getElementById('settings').className = 'settings';
                 } else {
                     total = 0;
@@ -181,27 +228,43 @@
                     document.getElementById('score').innerHTML = '';
                     document.getElementById('settings').classList.add('hide');
                 }
-            }
 
-            function maxTopFn(e) {
+                getNumbers();
+            };
+
+            const changeAddOnly = (e) => {
+                onlyAdd = e.checked;
+                if (e.checked) {
+                    isAdd = e.checked;
+                }
+            };
+
+            const changeTopDown = (e) => {
+                if (e.checked) {
+                    document.getElementById('equation').className = 'top-down-equation';
+                } else {
+                    document.getElementById('equation').className = '';
+                }
+            };
+
+            const maxTopFn = (e) => {
                 maxTop = e.value;
-            }
+            };
 
-            function maxBottomFn(e) {
+            const maxBottomFn = (e) => {
                 maxBottom = e.value;
-            }
+            };
 
-            function showScore(e) {
-                console.log(e);
-                if(e.checked) {
+            const showScore = (e) => {
+                if (e.checked) {
                     document.getElementById('score').className = '';
                 } else {
                     document.getElementById('score').className = 'hide';
                 }
-            }
+            };
 
-            function timerCheckbox(e) {
-                if(e.checked) {
+            const timerCheckbox = (e) => {
+                if (e.checked) {
                     timer = true;
                     document.getElementById('timer-value').className = '';
                     document.getElementById('timer-go').className = '';
@@ -212,9 +275,9 @@
                     document.getElementById('timer-go').className = 'hide';
                     document.getElementById('ok').className = '';
                 }
-            }
+            };
 
-            function go() {
+            const go = () => {
                 total = 0;
                 correct = 0;
                 incorrect = false;
@@ -228,7 +291,7 @@
                 var timer = seconds;
 
                 interval = setInterval(function(){
-                    if(timer === 0) {
+                    if (timer === 0) {
                         clearInterval(interval);
                         interval = null;
                         document.getElementById('score').className = 'end-score';
@@ -239,17 +302,9 @@
                     timer--;
 
                 }, 1000);
-            }
+            };
 
-            function useCapitals(e) {
-                if(e.checked) {
-                    capitals = true;
-                } else {
-                    capitals = false;
-                }
-            }
-
-            function onLoad() {
+            const onLoad = () => {
                 document.getElementById('text').focus();
 
                 var loadAnswer = '';
@@ -300,22 +355,30 @@
                     <label for='show-score'> Show Score </label>
                 </span>
                 <span>
+                    <input id='add-only' type='checkbox' onChange='changeAddOnly(this)'/>
+                    <label for='add-only'> Only Addition </label>
+                </span>
+                <span>
+                    <input id='top-down' type='checkbox' onChange='changeTopDown(this)'/>
+                    <label for='top-down'> Top Down Equation </label>
+                </span>
+                <span>
+                    <label for='maxTopNum'> Max Top Number: </label>
                     <select id='maxTopNum' onChange='maxTopFn(this)'>
                         <option value='10'>10</option>
                         <option value='20'>20</option>
                         <option value='50'>50</option>
                         <option value='100'>100</option>
                     </select>
-                    <label for='maxTopNum'> Max Top Number </label>
                 </span>
                 <span>
+                    <label for='maxBottomNum'> Max Bottom Number: </label>
                     <select id='maxBottomNum' onChange='maxBottomFn(this)'>
                         <option value='10'>10</option>
                         <option value='20'>20</option>
                         <option value='50'>50</option>
                         <option value='100'>100</option>
                     </select>
-                    <label for='maxBottomNum'> Max Top Number </label>
                 </span>
                 <span>
                     <input id='timer' type='checkbox' onChange='timerCheckbox(this)'/>
@@ -337,11 +400,13 @@
             </div>
 
             <span id='math'>
-                <div id='equation'>
+                <div id='equation' >
                     <div id='top' class='number'></div>
-                    <div id='operator'></div>
-                    <div id='bottom' class='number'></div>
-                    <div id='equals'>=</div>
+                    <div id='full-bottom'>
+                        <div id='operator'></div>
+                        <div id='bottom' class='number'></div>
+                    </div>
+                    <div id='equals'></div>
                     <div id='answer' class='number'></div>
                     <input type='textbox' id='text' placeholder='tap here first'/>
                 </div>
